@@ -77,16 +77,30 @@ namespace CEMU_Mod_Importer
             {
                 return;
             }
-            string ModRules = $"[Definition]\ntitleIds = {string.Join(", ", CurrentMod.TitleIds)}\nname = {CurrentMod.Name}\npath = \"{GameNameTextbox.Text}/Mods/{CurrentMod.Name}\"\ndescription = {CurrentMod.Description}\nversion = {CurrentMod.Version}\nfsPriority = {CurrentMod.fsPriority}";
-            Debug.AppendText(ModRules + "\n");
-            FileInfo file = new FileInfo(Path.GetDirectoryName(CEMU_path.FileName) + "\\graphicPacks\\mods\\" + GameNameTextbox.Text + " " + CurrentMod.Name + "\\rules.txt");
-            Debug.AppendText(file.FullName);
-            Directory.CreateDirectory(file.DirectoryName);
-            File.WriteAllText(file.FullName, ModRules);
-            foreach (String folder in ModFolders)
+
+            string modRules =
+$@"[Definition]
+titleIds = {string.Join(",", CurrentMod.TitleIds)}
+name = {CurrentMod.Name}
+path = ""{GameNameTextbox.Text}/Mods/{CurrentMod.Name}""
+description = {CurrentMod.Description}
+version = {CurrentMod.Version}
+fsPriority = {CurrentMod.fsPriority}";
+
+            FileInfo cemuModPath = new FileInfo($@"{Path.GetDirectoryName(CEMU_path.FileName)}\graphicPacks\mods\{GameNameTextbox.Text} {CurrentMod.Name}\rules.txt");
+
+            // Write rules.txt to mod folder
+            Directory.CreateDirectory(cemuModPath.DirectoryName);
+            File.WriteAllText(cemuModPath.FullName, modRules);
+
+            // Log disk writes
+            Debug.AppendText($"{modRules}\n-- rules.txt written to {cemuModPath.FullName} --\n");
+            foreach (string folder in ModFolders)
             {
-                Copy(folder, file.DirectoryName);
+                Copy(folder, cemuModPath.DirectoryName);
+                Debug.AppendText($"-- Contents written to {folder} --\n");
             }
+            Debug.AppendText("-- Done --\n\n");
         }
 
         private void NameBox_TextChanged(object sender, EventArgs e)
